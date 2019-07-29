@@ -29,6 +29,6 @@ scan_genesets <- function(gs_idx, n = 2, mut_data, rate_data,
     Opt_set <- comb.t[index, ] + 1  #best combination
     results <- rbind(comb, Tvec)  #combination and Test statistic together
     results <- results[, order(results[n + 1, ], decreasing = T)]
-    return(return(list(max_tg = Larg_TG, mat_tg_geneset = Opt_set,
+    return((list(max_tg = Larg_TG, mat_tg_geneset = Opt_set,
         all_tgs = results)))
 }
