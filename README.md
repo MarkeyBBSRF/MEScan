@@ -1,4 +1,5 @@
 # MEScan
+MEScan is an accurate and efficient statistical framework for genome-scale mutual exclusivity analysis of cancer mutations.
 
 ## Install from github
 
