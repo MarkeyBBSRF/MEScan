@@ -1,7 +1,7 @@
 # MEScan for large scale ME patterns survey
 We provide an example dataset from TCGA Ovarian Cancer to demonstrate the pipeline for large scale ME patterns survey using MEScan. 
 
-![pipeline](/mcmc/snakemake/dag.mcmc.png)
+![pipeline](mcmc/snakemake/dag.mcmc.png)
 
 Dependencies:
   * R:
