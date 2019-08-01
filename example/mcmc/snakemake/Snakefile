@@ -1,0 +1,126 @@
+from collections import defaultdict
+import os.path
+import yaml
+import random
+
+configfile: "snake_me/config.json"
+
+config['projects'] = yaml.load(open("./projects.yaml",'r'))
+config['seeds'] = range(config['NSEED'])
+print(config['seeds'])
+
+rule all:
+    input:
+        expand("re/{project}/{project}.hc_sets.txt",project=['brca','pan12','ov','gbm','lusc']),
+
+rule hc_sets:
+    input:
+        merged = expand("re/{{project}}/comb/gs{size}.merge.txt", size = range(2,8)),
+        cutoff = 're/{project}/cutoff.1e5.txt'
+    output:
+        're/{project}/{project}.hc_sets.txt'
+    shell:
+        "source activate python2.7 && python /scratch/lji226/incoming/ChiWang/maybe_test/synapse/snake_me/scripts/detect_multi_sets_jaccard.py "
+        "{output} re/{wildcards.project}/comb/ "
+        "{input.cutoff}"
+
+rule vis_hc:
+    input:
+        "re/{project}/{project}.hc_sets.txt",
+        lambda wildcards: config['projects'][wildcards.project]
+    output:
+        "re/{project}/{prefix}.vizCosmicNew.pdf"
+    shell:
+        "Rscript /scratch/lji226/incoming/ChiWang/maybe_test/synapse/snake_me/scripts/vis_filter.R {input[1]} "
+        "{input[0]} 300"
+
+rule combine_seeds:
+    input:
+        "re/{{project}}/freq/gs{{size}}.s{seed}.freq".format(seed=config['seeds'][0])
+    output:
+        "re/{project}/comb/gs{size}.merge.txt"
+    params:
+        cutoff = lambda wildcards: get_cutoff(wildcards)
+    shell:
+        "python snake_me/scripts/mergeFreq.py "
+        "re/{wildcards.project} {params.cutoff} {wildcards.size}"
+
+rule collapse_sets:
+    input:
+        "re/{project}/raw/gs{size}.s{seed}.raw"
+    output:
+        "re/{project}/freq/gs{size}.s{seed}.freq"
+    threads:
+        config['NSEED']
+    shell:
+        "python snake_me/scripts/geneset_freq.py "
+        "re/{wildcards.project} 0 {threads} {wildcards.size}"
+
+
+rule MCMC:
+    input:
+        tn = "re/{project}/tunning.txt",
+        dt = lambda wildcards: config['projects'][wildcards.project]
+    output:
+        expand("re/{{project}}/raw/gs{{size}}.s{seed}.raw",
+            seed=config['seeds'])
+    threads:
+        config['NSEED']
+    params:
+        tunning = lambda wildcards: get_tunning(wildcards)
+    log:
+        "log/gs{size}/mcmc.log"
+    shell:
+        "Rscript {config[RUN_MCMC]} "
+        "{input.dt} "
+        "{wildcards.size} "
+        "{config[NUM_ITERS]} "
+        "{params.tunning} "
+        "{config[BURNING]} "
+        "{config[NSEED]} "
+        "re/{wildcards.project} > {log}"
+
+rule estimate_FDRcutoff:
+    input:
+        lambda wildcards: config['projects'][wildcards.project]
+    output:
+        "re/{project}/cutoff.{iter,[^.]+}.txt"
+    threads:
+        1
+    shell:
+        "Rscript snake_me/scripts/get_threshold.R "
+        "{input} 2 7 {output} {wildcards.iter} 15"
+
+rule find_tunning:
+    input:
+        lambda wildcards: config['projects'][wildcards.project]
+    output:
+        "re/{project}/tunning.txt"
+    shell:
+        "Rscript {config[GET_TUNNING]} {input} "
+        "2 7 "
+        "100000 "
+        "1 > {output}"
+
+
+def get_tunning(wildcards):
+    fname = "re/"+wildcards.project+"/tunning.txt"
+    if not os.path.isfile(fname):
+        return(0)
+    t = dict()
+    with open(fname,'r') as fi:
+        for i in fi:
+            cols = i.strip().split(' ')
+            t[cols[0]] = cols[1]
+    return(t[wildcards.size])
+
+def get_cutoff(wildcards):
+    fname = "re/"+wildcards.project+"/cutoff.txt"
+    if not os.path.isfile(fname):
+        return(0)
+    t = dict()
+    with open(fname,'r') as fi:
+        for i in fi:
+            cols = i.strip().split(' ')
+            t[cols[0]] = cols[1]
+    return(t[wildcards.size])
