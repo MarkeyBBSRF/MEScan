@@ -34,7 +34,7 @@ snakemake -s snake_me/Snakefile -p re/ov/ov.hc_sets.txt
 
 
 ## Prepare Input
-We adapted the methods published in MADGIC](https://www.biostat.wisc.edu/kendzior/MADGiC/)package to generate the input for MEScan. Please follow the example provided in [example/prep_input](https://github.com/MarkeyBBSRF/MEScan/tree/master/example#how-to-generate-mescan-input)
+We adapted the methods published in [MADGIC](https://www.biostat.wisc.edu/kendzior/MADGiC/)package to generate the input for MEScan. Please follow the example provided in [example/prep_input](https://github.com/MarkeyBBSRF/MEScan/tree/master/example#how-to-generate-mescan-input)
 
 
 
