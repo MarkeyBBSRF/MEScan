@@ -14,13 +14,27 @@ library(devtools)
 install_github("markeybbsrf/mescan")
 ```
 
-## Install from Rstudio
+# Large scale ME patterns survey
+We provide an example dataset from TCGA Ovarian Cancer to demonstrate the pipeline for large scale ME patterns survey using MEScan. 
 
-1. Download the package source file from [release](https://github.com/MarkeyBBSRF/MEScan/releases)
-1. Install the package in RStudio -> `Tools` -> `Install Packages` -> `Install from:` -> `Package Archive File`. Then locate the `tar.gz` file you just downloaded.
+![pipeline](example/mcmc/snakemake/dag.mcmc.png)
+
+Dependencies:
+  * R:
+    1. MEScan
+    2. locfdr
+    3. snowfall
+  * Snakemake
+
+Execuate the following code to executate the pipeline. 
+```
+cd mcmc
+snakemake -s snake_me/Snakefile -p re/ov/ov.hc_sets.txt
+```
+
+
 ## Prepare Input
-The input for MEScan can be prepared using the `.R` adapted from the [MADGIC](https://www.biostat.wisc.edu/kendzior/MADGiC/)package.
-
+We adapted the methods published in MADGIC](https://www.biostat.wisc.edu/kendzior/MADGiC/)package to generate the input for MEScan. Please follow the example provided in [example/prep_input](https://github.com/MarkeyBBSRF/MEScan/tree/master/example#how-to-generate-mescan-input)
 
 
 
