@@ -36,7 +36,7 @@ snakemake -s snakemake/Snakefile -p re/ov/ov.hc_sets.genes.txt
 ```
 
 # MEScan input
-MEScan requires two tables: 1) mutation table and 2) background mutation rate table as inputs for the large scale survey. The inputs are generated using the methods published in the R package **[MADGIC](link_to_madgic) ** from  a given Mutation Annotation Format (MAF) file. We provide a script that take the MAF file as input and output the required input data matrix for MEScan.
+MEScan requires two tables: 1) mutation table and 2) background mutation rate table as inputs for the large scale survey. The inputs are generated using the methods published in the [MADGIC](https://www.ncbi.nlm.nih.gov/pubmed/25573922) paper from a Mutation Annotation Format (MAF) file. We provide a script that take the MAF file as input and output the required input data matrix for MEScan.
 
 #### a. Download MAGDIC related files
 
