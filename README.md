@@ -57,6 +57,16 @@ The `create_mescan_input.R ` takes a mutation annotation file (MAF) as input and
 Rscript create_mescan_input.R example.maf output_dir
 ```
 
+
+# MEScan output
+
+A list of high-confidence mutually exclusive gene sets will be returned in the following format. The first column is the gene sets delimited by `;`. The second column is the TG score for the gene set.
+
+| Genesets                                        | TG    |
+| :---------------------------------------------- | :---- |
+| ENSG00000142273;ENSG00000196531;ENSG00000187837 | 10.2  |
+| ENSG00000177885;ENSG00000170961;ENSG00000165916 | 9.448 |
+
 ## Reference
 Korthauer, K.D., Kendziorski, C.: Madgic: a model-based approach for identifying driver genes in cancer.
 Bioinformatics, 858 (2015)
