@@ -1,7 +1,7 @@
 {
     "NUM_SEEDS": 4,
-    "GET_TUNNING": "snake_me/scripts/get_tunning.R",
-    "RUN_MCMC": "snake_me/scripts/runMCMC_nseeds.R",
+    "GET_TUNNING": "snakemake/scripts/get_tunning.R",
+    "RUN_MCMC": "snakemake/scripts/runMCMC_nseeds.R",
     "NUM_ITERS": 100000,
     "BURNING": 10000,
     "NSEED":4

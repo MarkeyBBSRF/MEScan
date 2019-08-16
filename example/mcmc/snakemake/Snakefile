@@ -3,7 +3,7 @@ import os.path
 import yaml
 import random
 
-configfile: "snake_me/config.json"
+configfile: "snakemake/config.json"
 
 config['projects'] = yaml.load(open("./projects.yaml",'r'))
 config['seeds'] = range(config['NSEED'])
@@ -11,28 +11,27 @@ print(config['seeds'])
 
 rule all:
     input:
-        expand("re/{project}/{project}.hc_sets.txt",project=['brca','pan12','ov','gbm','lusc']),
+        expand("re/{project}/{project}.hc_sets.genes.txt",project=['ov']),
 
+rule index_to_id:
+    input:
+        're/{project}/{project}.hc_sets.txt',
+        lambda wildcards: config['projects'][wildcards.project]
+    output:
+        're/{project}/{project}.hc_sets.genes.txt'
+    shell:
+        "Rscript snakemake/scripts/index2gene.R {input[1]} {input[0]}"
 rule hc_sets:
     input:
-        merged = expand("re/{{project}}/comb/gs{size}.merge.txt", size = range(2,8)),
+        merged = expand("re/{{project}}/comb/gs{size}.merge.txt", size = range(2,6)),
         cutoff = 're/{project}/cutoff.1e5.txt'
     output:
         're/{project}/{project}.hc_sets.txt'
     shell:
-        "source activate python2.7 && python /scratch/lji226/incoming/ChiWang/maybe_test/synapse/snake_me/scripts/detect_multi_sets_jaccard.py "
+        "source activate python2.7 && python snakemake/scripts/detect_multi_sets_jaccard.py "
         "{output} re/{wildcards.project}/comb/ "
         "{input.cutoff}"
 
-rule vis_hc:
-    input:
-        "re/{project}/{project}.hc_sets.txt",
-        lambda wildcards: config['projects'][wildcards.project]
-    output:
-        "re/{project}/{prefix}.vizCosmicNew.pdf"
-    shell:
-        "Rscript /scratch/lji226/incoming/ChiWang/maybe_test/synapse/snake_me/scripts/vis_filter.R {input[1]} "
-        "{input[0]} 300"
 
 rule combine_seeds:
     input:
@@ -42,7 +41,7 @@ rule combine_seeds:
     params:
         cutoff = lambda wildcards: get_cutoff(wildcards)
     shell:
-        "python snake_me/scripts/mergeFreq.py "
+        "python snakemake/scripts/mergeFreq.py "
         "re/{wildcards.project} {params.cutoff} {wildcards.size}"
 
 rule collapse_sets:
@@ -53,7 +52,7 @@ rule collapse_sets:
     threads:
         config['NSEED']
     shell:
-        "python snake_me/scripts/geneset_freq.py "
+        "python snakemake/scripts/geneset_freq.py "
         "re/{wildcards.project} 0 {threads} {wildcards.size}"
 
 
@@ -88,8 +87,8 @@ rule estimate_FDRcutoff:
     threads:
         1
     shell:
-        "Rscript snake_me/scripts/get_threshold.R "
-        "{input} 2 7 {output} {wildcards.iter} 15"
+        "Rscript snakemake/scripts/get_threshold.R "
+        "{input} 2 5 {output} {wildcards.iter} 15"
 
 rule find_tunning:
     input:
@@ -98,7 +97,7 @@ rule find_tunning:
         "re/{project}/tunning.txt"
     shell:
         "Rscript {config[GET_TUNNING]} {input} "
-        "2 7 "
+        "2 5 "
         "100000 "
         "1 > {output}"
 
