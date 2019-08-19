@@ -67,6 +67,3 @@ A list of high-confidence mutually exclusive gene sets will be returned in the f
 | ENSG00000142273;ENSG00000196531;ENSG00000187837 | 10.2  |
 | ENSG00000177885;ENSG00000170961;ENSG00000165916 | 9.448 |
 
-## Reference
-Korthauer, K.D., Kendziorski, C.: Madgic: a model-based approach for identifying driver genes in cancer.
-Bioinformatics, 858 (2015)
