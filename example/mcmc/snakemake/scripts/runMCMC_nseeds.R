@@ -32,6 +32,7 @@ burning = as.numeric(args[5])
 nseeds = as.numeric(args[6])
 output_dir = args[7]
 seeds = 1:nseeds-1
+print(seeds)
 # MCMC parameter
 re.dir <- output_dir
 
@@ -60,6 +61,7 @@ wrapper <- function(x){
   seed = x
   genesets.f = paste0(re.dir,'/raw/',"gs",geneset_size,".",
     "s",seed,'.raw')
+  print(genesets.f)
   genesets.stat = gsub("raw$","stat",genesets.f)
   dir.create(paste0(re.dir,'/raw/'),showWarnings=F,recursive=T)
   re <- mcmc_core(mut_data,rate_data,
@@ -73,10 +75,10 @@ wrapper <- function(x){
 }
 
 library(snowfall)
-
+ncpu = ifelse(length(seeds)>10,10,length(seeds))
 bParallel=TRUE
-sfInit( parallel=bParallel, cpus=length(seeds) )
-stopifnot( sfCpus() == length(seeds) )
+sfInit( parallel=bParallel, cpus=ncpu )
+stopifnot( sfCpus() == ncpu )
 stopifnot( sfParallel() == bParallel )
 sfExportAll()
 sfLibrary(mescan)

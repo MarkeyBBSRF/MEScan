@@ -2,8 +2,9 @@ suppressPackageStartupMessages(library(mescan))
 library(locfdr)
 
 c_batch_run_tgscore <- function(gs_idx,size=3,n=10, mut_data,mut_rate,lambda,seed=1){
+
   if(n<2||n%%1!=0)
-  {return("number of gene in the sets is not valid")}
+  {print("number of gene in the sets is not valid")}
   samples = matrix(0,nrow=n,ncol=size)
   for(i in 1:n){
     samples[i,] = sample(gs_idx,size)
@@ -37,6 +38,8 @@ library(doMC)
 
 
 ################
+# set the input data file
+# after loading it contains mut.mat and rate.mut
 f = args[1]
 load(f)
 
@@ -44,17 +47,22 @@ mut_data <- as.matrix(mut.mat)
 rate_data <- as.matrix(rate.mut)
 
 seeds = sample(1:1e5,1)
+# set the number of iterations
 ns = as.numeric(args[5])
 df = 0
+# set the degree of freedom
 if(is.null(args[6])){
   df = 15
 }else{
   df = as.numeric(args[6])
 }
+# set the geneset size range, i.e, 2:7
 genesetSize = as.numeric(args[2]):as.numeric(args[3])
+print(genesetSize)
 # registerDoMC(args[5])
 # res = foreach(size = genesetSize,.combine = rbind) %dopar% 
 # {
+# set the file to write the results to
 fileConn<-file(args[4],'w')
 cutVec = NULL
 processed = NULL

@@ -19,6 +19,8 @@ rule index_to_id:
         lambda wildcards: config['projects'][wildcards.project]
     output:
         're/{project}/{project}.hc_sets.genes.txt'
+    singularity:
+        "docker://merckey/hotpot:mescan-1.0.0"
     shell:
         "Rscript snakemake/scripts/index2gene.R {input[1]} {input[0]}"
 rule hc_sets:
@@ -28,14 +30,14 @@ rule hc_sets:
     output:
         're/{project}/{project}.hc_sets.txt'
     shell:
-        "source activate python2.7 && python snakemake/scripts/detect_multi_sets_jaccard.py "
+        "python snakemake/scripts/detect_multi_sets_jaccard.py "
         "{output} re/{wildcards.project}/comb/ "
-        "{input.cutoff}"
+        "{input.cutoff} > hc_sets.log"
 
 
 rule combine_seeds:
     input:
-        "re/{{project}}/freq/gs{{size}}.s{seed}.freq".format(seed=config['seeds'][0])
+        expand("re/{{project}}/freq/gs{{size}}.s{seed}.freq",seed=config['seeds'])
     output:
         "re/{project}/comb/gs{size}.merge.txt"
     params:
@@ -52,8 +54,8 @@ rule collapse_sets:
     threads:
         config['NSEED']
     shell:
-        "python snakemake/scripts/geneset_freq.py "
-        "re/{wildcards.project} 0 {threads} {wildcards.size}"
+        "python snakemake/scripts/geneset_freq_single.py "
+        "{input} 0 {output}"
 
 
 rule MCMC:
@@ -67,17 +69,17 @@ rule MCMC:
         config['NSEED']
     params:
         tunning = lambda wildcards: get_tunning(wildcards)
-    log:
-        "log/gs{size}/mcmc.log"
+    singularity:
+        "docker://merckey/hotpot:mescan-1.0.0"
     shell:
-        "Rscript {config[RUN_MCMC]} "
+        "Rscript snakemake/scripts/runMCMC_nseeds.R "
         "{input.dt} "
         "{wildcards.size} "
         "{config[NUM_ITERS]} "
         "{params.tunning} "
         "{config[BURNING]} "
         "{config[NSEED]} "
-        "re/{wildcards.project} > {log}"
+        "re/{wildcards.project}"
 
 rule estimate_FDRcutoff:
     input:
@@ -86,6 +88,8 @@ rule estimate_FDRcutoff:
         "re/{project}/cutoff.{iter,[^.]+}.txt"
     threads:
         1
+    singularity:
+        "docker://merckey/hotpot:mescan-1.0.0"
     shell:
         "Rscript snakemake/scripts/get_threshold.R "
         "{input} 2 5 {output} {wildcards.iter} 15"
@@ -95,8 +99,10 @@ rule find_tunning:
         lambda wildcards: config['projects'][wildcards.project]
     output:
         "re/{project}/tunning.txt"
+    singularity:
+        "docker://merckey/hotpot:mescan-1.0.0"
     shell:
-        "Rscript {config[GET_TUNNING]} {input} "
+        "Rscript snakemake/scripts/get_tunning.R {input} "
         "2 5 "
         "100000 "
         "1 > {output}"
